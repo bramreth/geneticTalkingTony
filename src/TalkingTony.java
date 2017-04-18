@@ -14,8 +14,9 @@ public class TalkingTony {
     public TalkingTony(String target){
         loadBrain();
         this.target = target;
+        tonysBrain.updateForLength(target.length());
         for(int x = 0; x < target.length(); x++) {
-             tempGeneration += generateAscii();
+             tempGeneration += generateAscii(x);
         }
         String topGen = tempGeneration;
         while(fitness < target.length()*3){
@@ -30,7 +31,6 @@ public class TalkingTony {
             }
             gen++;
         }
-        tonysBrain.printBrain();
         tonysBrain.saveBrain();
     }
     private int calcFitness(String tempGeneration){
@@ -56,7 +56,7 @@ public class TalkingTony {
             if(r.nextInt(target.length()*3)<rate) {
                 creation += target.charAt(x);
             }else{
-                creation += generateAscii();
+                creation += generateAscii(x);
             }
         }
         return creation;
@@ -72,11 +72,11 @@ public class TalkingTony {
             tonysBrain = new Brain();
         }
     }
-    private char generateAscii(){
-        int randChar = new Random().nextInt(tonysBrain.getTotal());
+    private char generateAscii(int position){
+        int randChar = new Random().nextInt(tonysBrain.getTotal(position));
         int x = 0;
         for(int y = 32; y < 127; y++){
-            x+=tonysBrain.getLikelyAscii()[y-32];
+            x+=tonysBrain.getLikelyAscii(position)[y-32];
             if(randChar < x){
                 return (char) y;
             }
@@ -86,12 +86,16 @@ public class TalkingTony {
     private void learn(String oldGen, String newGen){
         for(int x = 0; x < oldGen.length(); x++){
             if(oldGen.charAt(x) != newGen.charAt(x)){
-                tonysBrain.updateLikelihood((int) newGen.charAt(x)-32);
+                tonysBrain.updateLikelihood((int) newGen.charAt(x)-32, x);
             }
         }
     }
 
     public int getGen() {
         return gen;
+    }
+
+    public Brain getTonysBrain() {
+        return tonysBrain;
     }
 }

@@ -2,66 +2,45 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Random;
 
 /**
  * Created by bramreth on 4/16/17.
+ * implement understanding the passage of time
  */
 public class Brain implements Serializable {
-    private int[] likelyAscii;
-    private int total;
+    private ArrayList<Concept> concept;
     public Brain(){
-        likelyAscii = new int[95];
-        for(int x = 0; x < 95; x++){
-            likelyAscii[x] = 1;
-            total++;
+        concept = new ArrayList<>();
+    }
+    public void updateForLength(int length){
+        while(length > concept.size()){
+            concept.add(new Concept());
         }
     }
-    public void updateLikelihood(int commonLetter){
-        if(likelyAscii[commonLetter] < 40){
-            likelyAscii[commonLetter]++;
-            total++;
+    public void updateLikelihood(int commonLetter, int position) {
+        if(position < concept.size()) {
+            concept.get(position).updateLikelihood(commonLetter);
         }else{
-            for(int x = 0; x < 95; x++){
-                if(likelyAscii[x] > 1 && x != commonLetter){
-                    if(likelyAscii[commonLetter] > 30){
-                        switch (new Random().nextInt(8)){
-                            case 0:
-                                likelyAscii[x]--;
-                                total--;
-                            default:
-                                break;
-                        }
-                    }else if(likelyAscii[commonLetter] > 20){
-                        switch (new Random().nextInt(4)){
-                            case 0:
-                                likelyAscii[x]--;
-                                total--;
-                            default:
-                                break;
-                        }
-                    }else if(likelyAscii[commonLetter] > 10){
-                        switch (new Random().nextInt(2)){
-                            case 0:
-                                likelyAscii[x]--;
-                                total--;
-                            default:
-                                break;
-                        }
-                    }else {
-                        likelyAscii[x]--;
-                        total--;
-                    }
-                }
-            }
+            concept.add(new Concept());
         }
-    }
-    public int[] getLikelyAscii(){
-        return likelyAscii;
     }
 
-    public int getTotal() {
-        return total;
+    public int[] getLikelyAscii(int position){
+        if(position < concept.size()) {
+            return concept.get(position).getLikelyAscii();
+        }else{
+            concept.add(new Concept());
+        }
+        return null;
+    }
+
+    public int getTotal(int position) {
+        if (position < concept.size()) {
+            return concept.get(position).getTotal();
+        }
+        return -1;
     }
 
     public void saveBrain() {
@@ -78,11 +57,16 @@ public class Brain implements Serializable {
     }
 
     public void printBrain(){
-        for(int x = 0; x < 95; x++){
-            char temp = (char) (x+32);
-            if(likelyAscii[x]>5) {
-                System.out.println("ascii: " + temp + " value: " + likelyAscii[x]);
+            int i = 0;
+            for(Concept thisConcept: concept) {
+                i++;
+                for(int x = 0; x < 95; x++) {
+                    char temp = (char) (x + 32);
+                    if (thisConcept.getLikelyAscii()[x] > 1) {
+                        System.out.println("concept " + i + ": " + temp + " value: " + thisConcept.getLikelyAscii()[x]);
+                    }
+                }
             }
-        }
     }
+
 }
